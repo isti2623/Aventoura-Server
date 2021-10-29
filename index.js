@@ -22,6 +22,7 @@ async function run() {
         await client.connect();
         const database = client.db("TourList");
         const tourCollection = database.collection("tour");
+        const orderCollection = database.collection("orders");
         //GET API
         app.get('/services', async (req, res) => {
             const cursor = tourCollection.find({});
@@ -29,6 +30,40 @@ async function run() {
             console.log(events);
             res.send(events);
         })
+        //GET all Orders API
+        app.get('/orders', async (req, res) => {
+            const cursor = orderCollection.find({});
+            const events = await cursor.toArray();
+            console.log(events);
+            res.send(events);
+        })
+
+        // delete my Order
+
+        app.delete("/allOrders/:id", async (req, res) => {
+            console.log(req.params.id);
+            const result = await orderCollection.deleteOne({
+                _id: ObjectId(req.params.id),
+            });
+            res.send(result);
+        });
+        // delete manage all Order
+
+        app.delete("/orders/:id", async (req, res) => {
+            console.log(req.params.id);
+            const result = await orderCollection.deleteOne({
+                _id: ObjectId(req.params.id),
+            });
+            res.send(result);
+        });
+        // my orders
+
+        app.get("/myOrders/:email", async (req, res) => {
+            const result = await orderCollection.find({
+                email: req.params.email,
+            }).toArray();
+            res.send(result);
+        });
 
         //add product
         app.post("/addServices", (req, res) => {
@@ -38,62 +73,43 @@ async function run() {
             });
         });
 
-        // get single prodcut
-
-        app.get("/services/:id", (req, res) => {
-            console.log(req.params.id);
-            tourCollection
-                .find({ _id: ObjectId(req.params.id) })
-                .toArray((err, results) => {
-                    res.send(results[0]);
-                });
+        //add Order
+        app.post("/orders", (req, res) => {
+            console.log(req.body);
+            orderCollection.insertOne(req.body).then((documents) => {
+                res.send(documents.insertedId);
+            });
         });
 
-        // get all order by email query
-        app.get("/addServices/:email", (req, res) => {
-            console.log(req.params);
-            eventCollection
-                .find({ email: req.params.email })
-                .toArray((err, results) => {
-                    res.send(results);
-                });
-        });
-
-        //DELETE API
-        app.delete('/allEvents/:id', async (req, res) => {
-            const id = req.params.id;
-            const query = { _id: ObjectId(id) }
-            const result = await eventCollection.deleteOne(query);
-            res.json(result);
-        })
 
         //Update get
-        app.get('/users/:id', async (req, res) => {
+        app.get('/orders/:id', async (req, res) => {
             const id = req.params.id;
             const query = { _id: ObjectId(id) };
-            const user = await eventCollection.findOne(query);
+            const user = await orderCollection.findOne(query);
             // console.log('load user with id: ', id);
             res.send(user);
         })
 
         //update product
-        app.put("/users/:id", async (req, res) => {
+        app.put("/orders/:id", async (req, res) => {
             const id = req.params.id;
             const updatedName = req.body;
             console.log(updatedName);
             const filter = { _id: ObjectId(id) };
 
-            eventCollection
+            orderCollection
                 .updateOne(filter, {
                     $set: {
-                        title: updatedName.title,
-                        image: updatedName.image,
+                        phone: updatedName.phone,
+                        address: updatedName.address,
                     },
                 })
                 .then((result) => {
                     res.send(result);
                 });
         });
+
 
 
 
