@@ -27,21 +27,21 @@ async function run() {
         app.get('/services', async (req, res) => {
             const cursor = tourCollection.find({});
             const events = await cursor.toArray();
-            console.log(events);
+
             res.send(events);
         })
         //GET all Orders API
         app.get('/orders', async (req, res) => {
-            const cursor = orderCollection.find({});
+            const cursor = await orderCollection.find({});
             const events = await cursor.toArray();
-            console.log(events);
+
             res.send(events);
         })
 
         // delete my Order
 
         app.delete("/allOrders/:id", async (req, res) => {
-            console.log(req.params.id);
+
             const result = await orderCollection.deleteOne({
                 _id: ObjectId(req.params.id),
             });
@@ -50,7 +50,7 @@ async function run() {
         // delete manage all Order
 
         app.delete("/orders/:id", async (req, res) => {
-            console.log(req.params.id);
+
             const result = await orderCollection.deleteOne({
                 _id: ObjectId(req.params.id),
             });
@@ -67,7 +67,7 @@ async function run() {
 
         //add product
         app.post("/addServices", (req, res) => {
-            console.log(req.body);
+
             tourCollection.insertOne(req.body).then((documents) => {
                 res.send(documents.insertedId);
             });
@@ -75,7 +75,7 @@ async function run() {
 
         //add Order
         app.post("/orders", (req, res) => {
-            console.log(req.body);
+
             orderCollection.insertOne(req.body).then((documents) => {
                 res.send(documents.insertedId);
             });
@@ -95,7 +95,7 @@ async function run() {
         app.put("/orders/:id", async (req, res) => {
             const id = req.params.id;
             const updatedName = req.body;
-            console.log(updatedName);
+
             const filter = { _id: ObjectId(id) };
 
             orderCollection
@@ -107,7 +107,46 @@ async function run() {
                 })
                 .then((result) => {
                     res.send(result);
+                    console.log(result);
                 });
+
+        });
+
+
+
+
+        // Confirm APi
+        /*   app.put("/confirm/:id", async (req, res) => {
+              const id = req.params.id;
+              const query = { _id: ObjectId(id) };
+  
+              const tour = {
+                  $set: {
+                      status: 'confirm'
+                  },
+              }
+              const result = await orderCollection.updateOne(query, tour);
+              res.json(result);
+              //console.log(result);
+          }); */
+
+
+        //update product
+        app.put("/confirm/:id", async (req, res) => {
+            const id = req.params.id;
+            const filter = { _id: ObjectId(id) };
+
+            orderCollection
+                .updateOne(filter, {
+                    $set: {
+                        status: "Confirm"
+                    },
+                })
+                .then((result) => {
+                    res.send(result);
+                    console.log(result);
+                });
+
         });
 
 
